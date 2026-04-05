@@ -1,0 +1,3 @@
+method,silhouette,calinski_harabasz,n_samples_silhouette,latent_dim,n_clusters
+vae_kmeans,0.12992028892040253,1352.7873785052632,3000,16,10
+pca_kmeans,0.08802536875009537,651.892306637609,3000,16,10
