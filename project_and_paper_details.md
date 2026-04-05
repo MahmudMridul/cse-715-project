@@ -1,11 +1,5 @@
 # Unsupervised Learning Project: VAE for Hybrid Language Music Clustering
 
-**Course:** Neural Networks  
-**Prepared By:** Moin Mostakim  
-**Submission Due:** April 10th, 2026
-
----
-
 ## Project Overview
 
 In this project, you will implement an unsupervised learning pipeline inspired by Variational Autoencoders (VAE) for clustering hybrid language music tracks. The goal is to extract latent representations from audio and/or lyrics and perform clustering. You will explore different VAE architectures, analyze clustering results, and compare with baseline methods (e.g., K-Means, PCA).
@@ -15,7 +9,6 @@ In this project, you will implement an unsupervised learning pipeline inspired b
 1. **GitHub Repository:** Code implementation, dataset processing scripts, and results.
 2. **NeurIPS-like Paper Report:** PDF report in a scientific format describing method, experiments, results, and discussion.
 
----
 
 ## Project Tasks
 
@@ -43,8 +36,6 @@ In this project, you will implement an unsupervised learning pipeline inspired b
 - Provide detailed visualizations: latent space plots, cluster distribution over languages/genres, reconstruction examples from VAE latent space.
 - Compare VAE-based clustering with PCA + K-Means, Autoencoder + K-Means, and direct spectral feature clustering.
 
----
-
 ## Sample Datasets
 
 - **Million Song Dataset (MSD):** http://millionsongdataset.com/  
@@ -65,8 +56,6 @@ In this project, you will implement an unsupervised learning pipeline inspired b
 - **Kaggle Lyrics Datasets:** https://www.kaggle.com/datasets?search=lyrics  
   Multiple datasets containing song lyrics in English, Hindi, Bangla, and other languages. Can combine with audio features for hybrid VAE experiments.
 
----
-
 ## Metrics and Comparison
 
 | Metric | Description | Higher Better? | Use Case |
@@ -77,8 +66,6 @@ In this project, you will implement an unsupervised learning pipeline inspired b
 | Adjusted Rand Index (ARI) | Measures agreement of clustering with ground truth labels | Yes | Partial label evaluation |
 | Normalized Mutual Information (NMI) | Quantifies the mutual information between clusters and labels | Yes | Cluster alignment with labels |
 | Cluster Purity | Fraction of dominant class in cluster, useful if labels are available | Yes | Label-based cluster quality evaluation |
-
----
 
 ## Metrics and Mathematical Formulations
 
@@ -96,8 +83,6 @@ where:
 
 The score ranges from **-1 to 1**. Higher is better.
 
----
-
 ### 2. Calinski-Harabasz Index (CH)
 
 Measures ratio of between-cluster variance to within-cluster variance.
@@ -112,8 +97,6 @@ where:
 
 Higher values indicate better clustering.
 
----
-
 ### 3. Davies-Bouldin Index (DB)
 
 Average similarity between each cluster and its most similar cluster.
@@ -126,8 +109,6 @@ where:
 
 Lower DB indicates better clustering.
 
----
-
 ### 4. Adjusted Rand Index (ARI)
 
 Measures similarity between predicted clusters and ground truth labels.
@@ -135,8 +116,6 @@ Measures similarity between predicted clusters and ground truth labels.
 $$ARI = \frac{RI - \text{Expected } RI}{\max(RI) - \text{Expected } RI}$$
 
 where RI (Rand Index) measures the fraction of pairs correctly clustered. ARI is adjusted for chance. Higher is better (1 = perfect match, 0 = random labeling).
-
----
 
 ### 5. Normalized Mutual Information (NMI)
 
@@ -149,8 +128,6 @@ where:
 - $H(U),\ H(V)$ = entropies of clusters and labels
 
 Higher values indicate better agreement with labels.
-
----
 
 ### 6. Cluster Purity
 
@@ -165,8 +142,6 @@ where:
 
 Higher purity indicates better clustering with respect to ground truth.
 
----
-
 ## Marks Distribution
 
 | Task/Component | Max Marks | Comments |
@@ -179,8 +154,6 @@ Higher purity indicates better clustering with respect to ground truth.
 | Report Quality | 10 | Well-structured NeurIPS-like report with clarity and completeness |
 | GitHub Repository | 10 | Organized, readable code, reproducibility, and clear instructions |
 
----
-
 ## Grading / Judging Criteria
 
 1. **Correctness of Implementation:** Your VAE implementation runs without errors and produces meaningful latent features.
@@ -191,8 +164,6 @@ Higher purity indicates better clustering with respect to ground truth.
 6. **Report Quality:** Your paper should be well-structured, follow NeurIPS format, and clearly present methods, experiments, and conclusions.
 7. **Code Quality and Reproducibility:** Your GitHub repo should include readable code, clear instructions, and scripts to reproduce results.
 8. **Creativity and Effort:** Extra points for innovative approaches, hyperparameter tuning, disentangled latent space, or multi-modal fusion.
-
----
 
 ## GitHub Repository Structure (Suggested)
 
@@ -214,8 +185,6 @@ project/
 ├── README.md
 └── requirements.txt
 ```
-
----
 
 ## Sample Report Template
 
