@@ -15,7 +15,7 @@ In this project, you will implement an unsupervised learning pipeline inspired b
 ### Easy Task
 
 - Implement a basic VAE for feature extraction from music data.
-- Use a small hybrid language music dataset (English + Bangla songs).
+- Use a small hybrid language music dataset.
 - Perform clustering using K-Means on latent features.
 - Visualize clusters using t-SNE or UMAP.
 - Compare with baseline (PCA + K-Means) using Silhouette Score and Calinski-Harabasz Index.
