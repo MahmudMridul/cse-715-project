@@ -1,3 +1,2 @@
-method,silhouette,calinski_harabasz,n_samples_silhouette,latent_dim,n_clusters
-vae_kmeans,0.12992028892040253,1352.7873785052632,3000,16,10
-pca_kmeans,0.08802536875009537,651.892306637609,3000,16,10
+method,latent_dim,beta,n_clusters,silhouette_mean,silhouette_std,calinski_harabasz_mean,calinski_harabasz_std,davies_bouldin_mean,davies_bouldin_std,ari_mean,ari_std,nmi_mean,nmi_std,purity_mean,purity_std
+vae_kmeans,8,4.0,2,0.9460128307342529,0.10958494386012599,42675.26399941614,26130.043176103587,0.34219386364476534,0.11133895631398902,-0.005297954662841041,0.00845898020459165,0.001703195040112639,0.001537035755954795,0.531946805319468,0.0
