@@ -16,14 +16,24 @@ class Encoder(nn.Module):
         input_dim: int,
         hidden_dim: int,
         latent_dim: int,
+        num_hidden_layers: int = 1,
+        dropout: float = 0.0,
     ) -> None:
         super().__init__()
-        self.fc1 = nn.Linear(input_dim, hidden_dim)
+        layers = []
+        in_dim = input_dim
+        for _ in range(num_hidden_layers):
+            layers.append(nn.Linear(in_dim, hidden_dim))
+            layers.append(nn.ReLU())
+            if dropout > 0.0:
+                layers.append(nn.Dropout(dropout))
+            in_dim = hidden_dim
+        self.backbone = nn.Sequential(*layers)
         self.fc_mu = nn.Linear(hidden_dim, latent_dim)
         self.fc_logvar = nn.Linear(hidden_dim, latent_dim)
 
     def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-        h = F.relu(self.fc1(x))
+        h = self.backbone(x)
         return self.fc_mu(h), self.fc_logvar(h)
 
 
@@ -33,14 +43,23 @@ class Decoder(nn.Module):
         latent_dim: int,
         hidden_dim: int,
         output_dim: int,
+        num_hidden_layers: int = 1,
+        dropout: float = 0.0,
     ) -> None:
         super().__init__()
-        self.fc1 = nn.Linear(latent_dim, hidden_dim)
-        self.fc_out = nn.Linear(hidden_dim, output_dim)
+        layers = []
+        in_dim = latent_dim
+        for _ in range(num_hidden_layers):
+            layers.append(nn.Linear(in_dim, hidden_dim))
+            layers.append(nn.ReLU())
+            if dropout > 0.0:
+                layers.append(nn.Dropout(dropout))
+            in_dim = hidden_dim
+        layers.append(nn.Linear(in_dim, output_dim))
+        self.net = nn.Sequential(*layers)
 
     def forward(self, z: torch.Tensor) -> torch.Tensor:
-        h = F.relu(self.fc1(z))
-        return self.fc_out(h)
+        return self.net(z)
 
 
 class VAE(nn.Module):
@@ -49,10 +68,24 @@ class VAE(nn.Module):
         input_dim: int,
         hidden_dim: int,
         latent_dim: int,
+        num_hidden_layers: int = 1,
+        dropout: float = 0.0,
     ) -> None:
         super().__init__()
-        self.encoder = Encoder(input_dim, hidden_dim, latent_dim)
-        self.decoder = Decoder(latent_dim, hidden_dim, input_dim)
+        self.encoder = Encoder(
+            input_dim,
+            hidden_dim,
+            latent_dim,
+            num_hidden_layers=num_hidden_layers,
+            dropout=dropout,
+        )
+        self.decoder = Decoder(
+            latent_dim,
+            hidden_dim,
+            input_dim,
+            num_hidden_layers=num_hidden_layers,
+            dropout=dropout,
+        )
         self.latent_dim = latent_dim
 
     @staticmethod
@@ -87,24 +120,60 @@ def train_vae(
     device: torch.device,
     lr: float = 1e-3,
     kl_weight: float = 1.0,
+    kl_warmup_epochs: int = 0,
+    val_loader: DataLoader | None = None,
+    early_stop_patience: int | None = None,
 ) -> list[float]:
     model.train()
     opt = torch.optim.Adam(model.parameters(), lr=lr)
     history: list[float] = []
+    best_val_loss: float | None = None
+    patience_left = early_stop_patience
 
-    for _ in tqdm(range(epochs), desc="VAE train"):
+    for epoch in tqdm(range(epochs), desc="VAE train"):
+        if kl_warmup_epochs and kl_warmup_epochs > 0:
+            warmup_factor = min(1.0, (epoch + 1) / float(kl_warmup_epochs))
+            current_kl_weight = kl_weight * warmup_factor
+        else:
+            current_kl_weight = kl_weight
+
         epoch_loss = 0.0
         n_batches = 0
         for (batch,) in train_loader:
             batch = batch.to(device)
             opt.zero_grad()
             recon, mu, logvar = model(batch)
-            loss = vae_loss(recon, batch, mu, logvar, kl_weight=kl_weight)
+            loss = vae_loss(recon, batch, mu, logvar, kl_weight=current_kl_weight)
             loss.backward()
             opt.step()
             epoch_loss += loss.item()
             n_batches += 1
-        history.append(epoch_loss / max(n_batches, 1))
+        train_epoch_loss = epoch_loss / max(n_batches, 1)
+        history.append(train_epoch_loss)
+
+        if val_loader is not None:
+            model.eval()
+            with torch.no_grad():
+                val_loss = 0.0
+                val_batches = 0
+                for (val_batch,) in val_loader:
+                    val_batch = val_batch.to(device)
+                    recon, mu, logvar = model(val_batch)
+                    v_loss = vae_loss(
+                        recon, val_batch, mu, logvar, kl_weight=current_kl_weight
+                    )
+                    val_loss += v_loss.item()
+                    val_batches += 1
+                val_loss = val_loss / max(val_batches, 1)
+            model.train()
+
+            if best_val_loss is None or val_loss < best_val_loss:
+                best_val_loss = val_loss
+                patience_left = early_stop_patience
+            elif early_stop_patience is not None:
+                patience_left -= 1
+                if patience_left <= 0:
+                    break
 
     return history
 
