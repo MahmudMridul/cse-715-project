@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -113,6 +115,13 @@ def vae_loss(
     return recon_loss + kl_weight * kl
 
 
+@dataclass
+class TrainHistory:
+    """Training history returned by train_vae."""
+    train_losses: list[float]
+    val_losses: list[float]
+
+
 def train_vae(
     model: VAE,
     train_loader: DataLoader,
@@ -123,10 +132,11 @@ def train_vae(
     kl_warmup_epochs: int = 0,
     val_loader: DataLoader | None = None,
     early_stop_patience: int | None = None,
-) -> list[float]:
+) -> TrainHistory:
     model.train()
     opt = torch.optim.Adam(model.parameters(), lr=lr)
-    history: list[float] = []
+    train_losses: list[float] = []
+    val_losses: list[float] = []
     best_val_loss: float | None = None
     patience_left = early_stop_patience
 
@@ -149,7 +159,7 @@ def train_vae(
             epoch_loss += loss.item()
             n_batches += 1
         train_epoch_loss = epoch_loss / max(n_batches, 1)
-        history.append(train_epoch_loss)
+        train_losses.append(train_epoch_loss)
 
         if val_loader is not None:
             model.eval()
@@ -165,6 +175,7 @@ def train_vae(
                     val_loss += v_loss.item()
                     val_batches += 1
                 val_loss = val_loss / max(val_batches, 1)
+            val_losses.append(val_loss)
             model.train()
 
             if best_val_loss is None or val_loss < best_val_loss:
@@ -175,7 +186,7 @@ def train_vae(
                 if patience_left <= 0:
                     break
 
-    return history
+    return TrainHistory(train_losses=train_losses, val_losses=val_losses)
 
 
 @torch.no_grad()
